@@ -1,0 +1,440 @@
+---
+title: "Trabalho_IAA004"
+author: "rodrigo rolim veras"
+date: "2024-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+-   Instalando todos os pacotes necessários
+
+```{r}
+# Instalando os pacotes necessarios:
+install.packages("BSDA")
+install.packages("onewaytests")
+install.packages("sjPlot")
+install.packages("tigerstats")
+install.packages("misty")
+install.packages("dplyr")
+install.packages("ggpubr")
+install.packages("tidyverse")
+install.packages("ggplot2")
+```
+
+-   Carregando os pacotes necessários
+
+```{r}
+library("BSDA")
+library("onewaytests")
+library("sjPlot")
+library("tigerstats")
+library("misty")
+library("dplyr")
+library("ggpubr")
+library(ggplot2)
+library(tidyverse)
+library (car)
+library(fdth)
+```
+
+Carregando a base de dados "salarios" em formato R trata-se de uma amostra com dois grupos, maridos e esposas, e que contém o salários de cada um desses indivíduos
+
+```{r}
+# Carregando a base de dados "salarios" em formato R
+load("salarios.RData")
+# visualizando algumas estatisticas e informacoes das variaveis
+summary(salarios)
+```
+
+```{r}
+options(scipen = 999)
+```
+
+seed para reproductibilidade
+
+```{r}
+set.seed(123)
+```
+
+visualizar a base de dados
+
+```{r}
+# visualizar a base de dados
+View(salarios)
+```
+
+#### 1. Gráficos e tabelas
+
+a.  Elaborar os gráficos box-plot e histograma das variáveis “age” (idade da esposa) e “husage” (idade do marido) e comparar os resultados
+
+-   Histogramas “age” (idade da esposa) e “husage” (idade do marido)
+
+**Ajusta as margens da figura**
+
+```{r}
+par(mar = c(5, 5, 2, 2))
+```
+
+**Histograma idade dos maridos**
+
+```{r}
+histograma.marido <- hist(
+  salarios$husage, 
+  xlab="Idade do Marido", 
+  ylab = "Frequência", 
+  main = "Distribuição das idades dos maridos" 
+)
+
+histograma.marido
+```
+
+**Histograma idade das esposas**
+
+```{r}
+histograma.esposa <- hist( 
+  salarios$age, 
+  xlab="Idade da Esposa",
+  ylab = "Frequência", 
+  main = "Distribuição das idades das esposas"
+) 
+
+histograma.esposa
+```
+
+**Comparando (média da idade marido x esposa)**
+
+```{r}
+media.esposa <- mean(salarios$age) # media da idade da esposa é: 39,43
+
+media.marido <- mean(salarios$husage) # media da idade do marido é: 42,46
+
+(media.marido/media.esposa-1)*100 # considerando a média de idade, a dos maridos é 7,68% maior que a média de idade das esposas
+```
+
+**comparando (mediana da idade maridos x esposas)**
+
+```{r}
+mediana.esposa <- median(salarios$age) 
+paste('mediana da idade das esposas é:', mediana.esposa) # mediana da idade das esposas é: 39
+
+mediana.marido <- median(salarios$husage) 
+paste('mediana da idade dos maridos é:', mediana.marido) # mediana da idade dos maridos é: 41
+
+(mediana.marido/mediana.esposa -1)*100 # considerando a mediana da idade, a dos maridos é 5,13% maior que a mediana das esposas
+```
+
+-   Calculando a moda (idade dos maridos e idade da esposas)
+
+**Para a idade das esposas**
+
+```{r}
+table(salarios$age) 
+moda.esposa <- subset(
+  table(salarios$age), 
+  table(salarios$age) == max(table(salarios$age))
+) 
+moda.esposa.moda <- names(moda.esposa) 
+moda.esposa.total <- moda.esposa[1]
+moda.esposa
+```
+
+**Para a idade dos maridos**
+
+```{r}
+table(salarios$husage) 
+moda.marido <- subset(
+    table(salarios$husage), table(salarios$husage) == max(table(salarios$husage))
+  )
+
+moda.marido.moda <- names(moda.marido) 
+moda.marido.total <- moda.marido[1]
+moda.marido.moda <- as.numeric(moda.marido.moda) 
+moda.marido
+```
+
+A moda da idade dos maridos é de 44 anos, com 201 pessoas. A moda da idade das esposas é de 37 anos, com 217 pessoas.
+
+```{r}
+moda.marido.moda
+moda.esposa.moda
+((moda.marido.moda / as.numeric(moda.esposa.moda)) - 1)*100
+```
+
+Portanto, a moda da idade dos maridos é maior que a das esposas em 18,92%
+
+**Gerando o boxplot para a variavel "age" que é a idade da esposa**
+
+```{r}
+Boxplot( ~ age, data=salarios, id=list(method="y"), ylab="Idade da esposa")
+```
+
+**Gerando o boxplot para a variavel "husage" que é a idade do marido**
+
+```{r}
+Boxplot( ~ husage, data=salarios, id=list(method="y"), ylab="Idade do marido")
+```
+
+#### 2. Medidas de posição e dispersão
+
+a.  Calcular a média, mediana e moda das variáveis “age” (idade da esposa) e “husage” (idade do marido) e comparar os resultados.
+
+-   Calcular média das idades
+
+**média das idades dos maridos**
+
+```{r}
+media.marido <- mean(salarios$husage) # media da idade do marido é: 42,46
+media.marido
+```
+
+**média das idades das esposas**
+
+```{r}
+media.esposa <- mean(salarios$age) # media da idade da esposa é: 39,43
+media.esposa
+```
+
+**comparando os resultados das médias obtidas**
+
+```{r}
+(media.marido/media.esposa-1)*100 # considerando a média de idade, a dos maridos é 7,68% maior que a média de idade das esposas
+```
+
+A média de idade dos maridos é 7,68% maior que a média de idade das esposas.
+
+-   Calcular a mediana das idades
+
+**mediana das idades dos maridos**
+
+```{r}
+mediana.marido <- median(salarios$husage) 
+paste('mediana da idade dos maridos é:', mediana.marido) # mediana da idade dos maridos é: 41
+```
+
+**mediana das idades das esposas**
+
+```{r}
+mediana.esposa <- median(salarios$age) 
+paste('mediana da idade das esposas é:', mediana.esposa) # mediana da idade das esposas é: 39
+```
+
+**comparando os resultados das medianas obtidas**
+
+```{r}
+(mediana.marido/mediana.esposa -1)*100 # considerando a mediana da idade, a dos maridos é 5,13% maior que a mediana das esposas
+```
+
+Considerando a mediana da idade, a dos maridos é 5,13% maior que a mediana das esposas.
+
+-   Calcular a moda das idades
+
+**moda das idades dos maridos**
+
+```{r}
+table(salarios$husage) 
+moda.marido <- subset(
+    table(salarios$husage), table(salarios$husage) == max(table(salarios$husage))
+  )
+
+moda.marido.moda <- names(moda.marido) 
+moda.marido.total <- moda.marido[1]
+moda.marido.moda <- as.numeric(moda.marido.moda) 
+moda.marido
+```
+
+**moda das idades das esposas**
+
+```{r}
+table(salarios$age) 
+moda.esposa <- subset(
+  table(salarios$age), 
+  table(salarios$age) == max(table(salarios$age))
+) 
+moda.esposa.moda <- names(moda.esposa) 
+moda.esposa.total <- moda.esposa[1]
+moda.esposa
+```
+
+A moda da idade dos maridos é de 44 anos, com 201 pessoas. A moda da idade das esposas é de 37 anos, com 217 pessoas.
+
+**comparando as modas obtidas**
+
+```{r}
+moda.marido.moda
+moda.esposa.moda
+((moda.marido.moda / as.numeric(moda.esposa.moda)) - 1)*100
+```
+
+Portanto, a moda da idade dos maridos é maior que a das esposas em 18,92%.
+
+#### 3. Testar se as médias (se você escolher o teste paramétrico) ou as medianas (se você escolher o teste não paramétrico) das variáveis “age” (idade da esposa) e “husage” (idade do marido) são iguais, construir os intervalos de confiança e comparar os resultados
+
+Primeiramente vamos criar uma nova tabela de dados contendo um coluna "group" com dois valores possíveis: esposas e maridos; e uma coluna "ages" contendo as idades das esposas e dos marido.
+
+```{r}
+husband.ages <- salarios$husage
+wife.ages <- salarios$age
+
+husgroup <- rep(c('husband'), times=length(husband.ages))
+wifegroup <- rep(c('wife'), times=length(wife.ages))
+
+husdata <- data.frame(group=husgroup, ages=husband.ages)
+wifdata <- data.frame(group=wifegroup, ages=wife.ages)
+
+data.ages <- rbind(husdata, wifdata)
+data.ages
+```
+
+Vamos fazer as checagens preliminares para verificar se: as amostras são independentes, se temos normalidade dos dados e homogeneidade das variâncias entre grupos.
+
+1.  Premissa 1: As duas amostras são independentes? Sim, pois os grupos de maridos e esposas não estão relacionados. Não se trata de uma amostra ou grupos emparelhados.
+
+2.  Premissa 2: Os dados de cada amostra/grupo possuem distribuição normal? Vamos usar o teste de normalidade Shapiro-Wilk com o seguinte teste de hipóteses:
+
+-   H0: os dados são normalmente distribuidos
+-   Ha: os dados não são normalmente distribuidos
+
+3.  Premissa 3. As duas populações/amostras/grupos possuem homogeneidade das variâncias? O teste de hipoteses são:
+
+-   H0: As variâncias são estatisticamente iguais(homogeneas)
+-   HA: As variâncias não são estatisticamente iguais(homogeneas)
+
+Primeiro vamos fazer o teste de normalidade Shapiro-Wilk para a "idade" dos maridos:
+
+```{r}
+with(data.ages, shapiro.test(ages[group == 'husband'][1:5000]))
+```
+
+p-value \< 0.05 (ou seja, 0.00000000000000022), logo o grupo idade dos maridos não possui distribuição normal.
+
+Agora vamos fazer o teste de normalidade Shapiro-Wilk para a idade das esposas.
+
+```{r}
+with(data.ages, shapiro.test(ages[group == 'wife'][1:5000]))
+```
+
+p-value \< 0.05 (ou seja, 0.00000000000000022), logo o grupo idade das esposas não possui distribuição normal também.
+
+Agora, iremos verificar, por título de curiosidade, a premissa 3, se os grupos possuem homogeneidade nas suas variâncias.
+
+Usaremos o teste F para testar a homogeneidade nas variância
+
+```{r}
+res.ftest <- var.test(ages ~ group, data = data.ages)
+res.ftest
+```
+
+Obtendo o valor tabelado da distribuicao F
+
+```{r}
+qf(0.95, 5633, 5633)
+```
+
+Temos F=1.04481 e para a outra cauda temos: 1/1.04481 com F = 0.9571118
+
+Vamos construir o grafico:
+
+```{r}
+dist_f(f = 1.04481, deg.f1 = 5633, deg.f2 = 5633)
+dist_f(f = 0.9571118, deg.f1 = 5633, deg.f2 = 5633)
+```
+
+O teste de F tem valor critico entre 0.9571118 e 1.04481 (regiao de não rejeição de H0), os valores acima de 1.04481 e abaixo de 0.9571118 estão na região de rejeição de H0 (área azul do gráfico). O valor da estatistica F calculada é 1.2638. Como esse valor se encontra na região de rejeição de H0, então rejeitamos a hipótese de que as variâncias são estatisticamente iguais.
+
+Portanto, usaremos o test U de Mann-Whitney (não paramétrico), visto que os dados não estão normalmente distribuídos e nem possuem variâncias homogeneas.
+
+#### Test U de Mann-Whitney
+
+O que queremos saber: Queremos saber se a idade mediana das esposas difere da idade mediana dos maridos.
+
+Vamos primeiro calcular um sumário estatistico
+
+```{r}
+group_by(data.ages, group) %>%
+  summarise(
+    count = n(),
+    median = median(ages, na.rm = TRUE),
+    IQR = IQR(ages, na.rm = TRUE)
+  )
+```
+
+Vamos visualizar os dados usando box-plots e nós plotaremos o "ages" por "group"
+
+```{r}
+ggboxplot(
+  data.ages, 
+  x = 'group',
+  y = 'ages', 
+  color = 'group',
+  palette=c("#00AFBB", "#E7B800"),
+  ylab = "Ages", 
+  xlab = "Groups"
+)
+```
+
+Para evitar a notacao cientifica
+
+```{r}
+options(scipen = 999)
+```
+
+Vamos fazer o teste para averiguar se a idade mediana dos maridos é igual à idade mediana das esposas
+
+Hipoteses do teste:
+
+-   H0: A idade mediana dos maridos é igual estatisticamente à idade mediana das esposas;
+-   Ha: A idade mediana dos maridos nao é estatisticamente igual à idade mediana das esposas.
+
+O teste é sempre feito com relação a disposição no vetor de dados, do ultimo para o primeiro - No vetor: husband contra wife
+
+```{r}
+res.w <- wilcox.test(ages ~ group, data = data.ages, exact = FALSE, conf.int = TRUE)
+res.w
+```
+
+O p-value do teste é 0.00000000000000022, que é menor que o nível de significancia 0,05. Podemos concluir que a idade mediana dos maridos é estatisticamente diferente da idade mediana das esposas (rejeitamos H0). O intervalo de confiança da diferença entre as medianas está entre 2.000033 e 3.000024, com uma mediana de 2.999966. No entando, é notável o quão próximo está os valores das medianas calculadas, talvez essa diferença seja estatisticamente diferente por conta dos outliers presentes nas idades dos maridos.
+
+Se quisermos testar se a idade mediana dos maridos é menor que a idade mediana das esposas, podemos fazer:
+
+Hipoteses do teste:
+
+-   H0: A idade mediana dos maridos não é estatisticamente menor que a idade mediana das esposas;
+-   Ha: A idade mediana dos maridos é estatisticamente menor que a idade mediana das esposas.
+
+Usamos a seguinte função:
+
+```{r}
+wilcox.test(
+  ages ~ group, 
+  data = data.ages, 
+  exact = FALSE, 
+  alternative = 'less', 
+  conf.int = TRUE
+)
+```
+
+Como p-value \> 0.05, aceitamos H0, a idade mediana dos maridos nao é menor que a idade mediana das esposas. O intervalo de confianca da diferenca entre as medianas é um valor menor que 3.000034, com uma mediana de 2.999966
+
+Se quisermos testar se a idade mediana dos maridos é maior que a idade mediana das esposas:
+
+Hipoteses do teste:
+
+-   H0: A idade mediana dos maridos não é estatisticamente maior que a idade mediana das esposas;
+-   Ha: A idade mediana dos maridos é estatisticamente maior que a idade mediana das esposas.
+
+Usamos a seguinte função:
+
+```{r}
+wilcox.test(
+  ages ~ group,
+  data = data.ages,
+  exact = FALSE, 
+  alternative = 'greater',
+  conf.int = TRUE
+)
+```
+
+Como p-value \< 0.05, a idade mediana dos maridos é estatisticamente maior que a idade mediana das esposas (portanto, rejeitamos H0). O intervalo de confiança para a diferença entre as medianas é um valor maior que 2.000046 com uma mediana de 2.999966
