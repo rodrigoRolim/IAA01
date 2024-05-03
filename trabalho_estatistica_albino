@@ -1,0 +1,314 @@
+#TRABALHO DE IAA004 – Estatística Aplicada I
+
+# ALBINO BOGUCHESKI JUNIOR
+
+# Instalando pacotes
+# install.packages("tidyverse")
+# install.packages("ggplot2")
+# Instalando os pacotes necessarios para os testes
+# install.packages("carData")
+# install.packages("datasets")
+# install.packages("BSDA")
+# install.packages("nortest")
+# install.packages("stats")
+# install.packages("rcompanion")
+# install.packages("dplyr")
+# install.packages("tigerstats")
+# install.packages("misty")
+# install.packages("ggpubr")
+
+# Carregando os pacotes
+library(ggplot2)
+library(tidyverse)
+library (car)
+library(fdth)
+library(carData)
+library(datasets)
+library(BSDA)
+library(nortest)
+library(stats)
+library(rcompanion)
+library(dplyr)
+library(tigerstats)
+library(misty)
+library(ggpubr)
+
+# Para execução do trabalho usar a base de dados “salarios.RData”
+setwd("I:/Meu Drive/1 - Especialização IA UFPR/IAA004/Atividades")
+# Carregando a base de dados "salarios" em formato R
+load("salarios.RData")
+# visualizando algumas estatisticas e informacoes das variaveis
+summary(salarios)
+
+
+# 1 Gráficos e tabelas
+## a) (15 pontos) Elaborar os gráficos box-plot e histograma das variáveis “age” (idade da esposa) e 
+## “husage” (idade do marido) e comparar os resultados
+
+# Criando o histograma da idade da esposa com no máximo 9 barras
+histograma_esposa <- ggplot(salarios, aes(x = age)) +
+  geom_histogram(binwidth = 5, bins = 9, fill = "#00AFBB", color = "black") +
+  labs(x = "Idade da Esposa", y = "Frequência") +
+  theme_minimal() +
+  coord_cartesian(ylim = c(0, 1500))
+
+# Criando o histograma da idade do marido com no máximo 9 barras
+histograma_marido <- ggplot(salarios, aes(x = husage)) +
+  geom_histogram(binwidth = 5, bins = 9, fill = "#E7B800", color = "black") +
+  labs(x = "Idade do Marido", y = "Frequência") +
+  theme_minimal() + 
+  coord_cartesian(ylim = c(0, 1500))
+
+# Criando o boxplot da idade da esposa
+boxplot_esposa <- ggplot(salarios, aes(x = "", y = age)) +
+  geom_boxplot(fill = "#00AFBB") +
+  labs(y = "Idade da Esposa") +
+  theme_minimal() +
+  coord_cartesian(ylim = c(0, 100))
+
+# Criando o boxplot da idade do marido
+boxplot_marido <- ggplot(salarios, aes(x = "", y = husage)) +
+  geom_boxplot(fill = "#E7B800") +
+  labs(y = "Idade do Marido") +
+  theme_minimal() +
+  coord_cartesian(ylim = c(0, 100))
+
+# Combinando os gráficos em uma única visualização
+plot_comparativo <- plot_grid(histograma_esposa, histograma_marido, boxplot_esposa, boxplot_marido,
+                              labels = c("Histograma Esposa", "Histograma Marido", "Boxplot Esposa", "Boxplot Marido"),
+                              ncol = 2)
+plot_comparativo
+mean(salarios$age)
+mean(salarios$husage)
+min(salarios$age)
+max(salarios$age)
+min(salarios$husage)
+max(salarios$husage)
+
+## analisando as informações, verificamos que a media de idades das esposas eh de 39.43 e dos maridos eh de 42.46,
+# a distribuição das idades é mais extensa dos maridos do que das esposas, sendo a idade minima das esposas de 18 anos,
+# dos maridos 19, e a idade máxima das esposas 59 anos e dos maridos 86 anos. Verificamos que para os
+# maridos, existem outliers.
+
+## b) (15 pontos) Elaborar a tabela de frequencias das variáveis “age” (idade da esposa) e “husage” 
+## (idade do marido) e comparar os resultados
+# Calculando a distribuicao de frequencia e guardando no objeto "tabela.freq"
+# tabela esposa
+tabela.freq.E <- fdt(salarios$age)
+print(tabela.freq.E)
+# tabela marido
+tabela.freq.M <- fdt(salarios$husage)
+print(tabela.freq.M)
+# Comparando os resultados 
+## analisando as tabelas de frequencia, verificamos que entre as esposas, as faixas de idades mais comuns estão entre 
+# 32 a 38 anos, e dos maridos estão entre 28 a 52 anos.
+
+# 2 Medidas de posição e dispersão
+## a) (15 pontos) Calcular a média, mediana e moda das variáveis “age” (idade da esposa) e “husage” 
+## (idade do marido) e comparar os resultados
+
+# calculando a média
+media.esposa <- mean(salarios$age)
+# media da idade da esposa é: 39,43
+media.marido <- mean(salarios$husage)
+# media da idade do marido é: 42,46 
+(media.marido/media.esposa-1)*100
+# considerando a média de idade, a dos maridos é 7,68% maior que a média de idade das esposas
+
+# calculando a mediana
+mediana.esposa <- median(salarios$age)
+mediana.esposa
+# mediana da idade das esposas é: 39
+mediana.marido <- median(salarios$husage)
+mediana.marido
+# mediana da idade dos maridos é: 41
+(mediana.marido/mediana.esposa -1)*100
+# considerando a mediana da idade, a dos maridos é 5,13% maior que a mediana das esposas
+
+# calculando a moda (idade dos maridos e idade da esposas)
+# Para a idade das esposas
+table(salarios$age)
+moda.esposa <- subset(table(salarios$age), table(salarios$age) == max(table(salarios$age)))
+moda.esposa.calc <- names(moda.esposa)
+moda.esposa.calc <- as.numeric(moda.esposa.calc)
+moda.esposa
+# Para a idade dos maridos 
+table(salarios$husage)
+moda.marido <- subset(table(salarios$husage), table(salarios$husage) == max(table(salarios$husage)))
+moda.marido.calc <- names(moda.marido)
+moda.marido.calc <- as.numeric(moda.marido.calc)
+moda.marido
+# A moda da idade dos maridos eh de 44 anos, com 201 pessoas 
+# A moda da idade das esposas eh de 37 anos, com 217 pessoas
+(moda.marido.calc / moda.esposa.calc -1)*100
+# Portanto, a moda da idade dos maridos eh maior que a das esposas em 18,92%
+
+
+## b) (15 pontos) Calcular a variância, desvio padrão e coeficiente de variação das variáveis “age” 
+## (idade da esposa) e “husage” (idade do marido) e comparar os resultados
+
+# Calculando a variância
+# Calculando a variancia da idade das esposas
+var(salarios$age)
+# Calculando a variancia da idade dos maridos
+var(salarios$husage)
+# A variancia da idade das esposas eh 99,75 anos
+# A variancia da idade dos maridos eh 126,07 anos
+# Se dividirmos a variancia da idade das esposas pelo dos maridos:
+((99.75/126.07)-1)*100
+# Portanto, a variância da idade das esposas eh 20,88 menor que dos maridos
+
+# Calculando o desvio padrão
+# Calculando o desvio padrão da idade das esposas
+sd(salarios$age)
+# Calculando o desvio padrão da idade dos maridos
+sd(salarios$husage)
+# O desvio padrao da idade das esposas eh 9,99 anos
+# O desvio padrao da idade dos maridos eh 11,23 anos
+# Se dividirmos o desvio padrao da idade das esposas pelo dos maridos
+((9.99/11.23)-1)*100
+# O desvio padrao da idade das esposas eh 11,05 % menor do que dos maridos
+
+# calculando o coeficiente de variação
+# Calculando a media da idade das esposas e guardando na variável "meanE"
+meanE <- mean(salarios$age)
+# Calculando a media da idade dos maridos e guardando na variável "meanM"
+meanM <- mean(salarios$husage)
+# Calculando o desvio padrao da idade das esposas e guardando na variável "sdE"
+sdE <- sd(salarios$age)
+# Calculando o desvio padrao da idade dos maridos e guardando na variável "sdM"
+sdM <- sd(salarios$husage)
+# Calculando o coeficiente de variacao da idade das esposas e guardando na variável "cvE"
+cvE <- (sdE/meanE)*100
+cvE
+# O coeficiente de variacao da idade das esposas eh 25,34%
+# Calculando o coeficiente de variacao da idade dos maridos e guardando na variável "cvM"
+cvM <- (sdM/meanM)*100
+cvM
+# O coeficiente de variacao da idade dos maridos eh 26,45%
+# Isso quer dizer que a idade das esposas e dos maridos não variam muito na amostra.
+# Ainda, pode-se concluir que a idade dos maridos variam mais que das esposas e conforme a regra,
+# existe média dispersão
+# Regra de bolso:
+# Quando o CV for:
+# a) CV < 15% existe baixa dispersao: dados homogeneos
+# b) 15% =< CV <= 30% existe media dispersao
+# c) CV > 30% existe alta dispersao: dados heterogeneos
+
+
+
+## 3 Testes paramétricos ou não paramétricos
+## a) (40 pontos) Testar se as médias (se você escolher o teste paramétrico) ou as medianas (se você escolher 
+## o teste não paramétrico) das variáveis “age” (idade da esposa) e “husage” (idade do marido) são iguais,
+## construir os intervalos de confiança e comparar os resultados.
+## Obs: 
+## 1) Você deve fazer os testes necessários (e mostra-los no documento pdf) para saber se você 
+## deve usar o unpaired test (paramétrico) ou o teste U de Mann-Whitney (não paramétrico), 
+## justifique sua resposta sobre a escolha.
+## 2) Lembre-se de que os intervalos de confiança já são mostrados nos resultados dos testes 
+## citados no item 1 acima.
+
+# Testes necessários para saber qual utilizar
+
+# Configurando para nao aparecer notacao cientifica nos resultados
+options(scipen = 999)
+
+# Vamos utilizar a base de dados "salarios.RData" que tem dados de idade de esposas e maridos
+# agrupando os dados na variável "idades.df"
+idades.df <- data.frame(
+  group = rep(c("Esposas", "Maridos"), each = 5634),
+  idades = c(salarios$age, salarios$husage)
+)
+
+# calculando as estatisticas descritivas por grupo esposas e maridos
+# obtendo a media e a distancia interquartilica
+group_by(idades.df, group) %>%
+  summarise(
+    count = n(),
+    mean =  mean(idades, na.rm = TRUE),
+    sd = sd(idades, na.rm = TRUE)
+  )
+# calculando a media e mediana do grupo
+mean(idades.df$idades)
+median(idades.df$idades)
+# Calculando o desvio padrao de toda amostra:
+sd(idades.df$idades)
+# apresentando o histograma (aqui com os valores já agrupados)
+hist(idades.df$idades, xlab="Idades", ylab = "Frequência")
+# Vamos plotar a curva normal sobre o histograma:
+plotNormalHistogram(idades.df$idades, prob = FALSE, 
+                    main = "Distribuição Normal sobreposta ao Histograma", 
+                    length = 1000 )
+
+# Para uma amostra ou grupo nao eh necessario testar se a
+# variancia eh constante isto porque basta que a amostra/
+# populacao seja normalmente distribuida para que a variancia
+# seja bem comportada.
+# Se soubermos que a amostra provem de uma populacao normalmente
+# distribuida nao eh necessario ou obrigatorio testar a 
+# normalidade, mas eh prudente.
+
+# Executanto teste de normalidade de Kolmogorov-Smirnov
+lillie.test(idades.df$idades)
+
+# Regra de bolso: Como o p-value (0.00000000000000022) eh inferior a 0.05, a variavel
+# "idades" não eh normalmente distribuida 
+#############################################################################################
+
+# Vamos calcular um sumario estatistico da amostra
+group_by(idades.df, group) %>%
+  summarise(
+    count = n(),
+    median = median(idades, na.rm = TRUE),
+    IQR = IQR(idades, na.rm = TRUE)
+  )
+# Vamos visualizar os dados usando box-plots
+# Plotaremos a "idades" por groupo
+ggboxplot(idades.df, x = "group", y = "idades", 
+          color = "group", palette=c("#00AFBB", "#E7B800"),
+          ylab = "Idade", xlab = "Grupos")
+
+# Para evitar a notacao cientifica 
+options(scipen = 999)
+# Vamos fazer o teste se a idade mediana dos maridos eh igual a
+# idade mediana das esposas
+
+# Hipoteses do teste:
+
+# H0: A idade mediana dos maridos eh igual estatisticamente a idade
+#     mediana das esposas;
+# Ha: A idade mediana dos maridos nao eh estatisticamente igual a
+#     idade mediana das esposas.
+
+# O teste eh sempre feito com relacao a disposicao no vetor de
+# dados, do ultimo para o primeiro - No vetor: Maridos contra Esposas
+wilcox.test(idades ~ group, data = idades.df,
+                   exact = FALSE, conf.int=TRUE)
+
+# O p-value do teste eh 0.00000000000000022, que eh menor que o nivel de
+# significancia 0,05. Podemos concluir que a idade mediana dos
+# maridos eh estatisticamente DIFERENTE da idade mediana das
+# esposas (rejeitamos H0) e acolhemos a hipótese alternativa (Ha)
+# O intervalo de confianca da diferenca entre as medianas esta 
+# entre -3.00 e -2.00, com uma mediana de -2.99.
+
+
+############################### TESTANDO RETIRANDO OS OUTLIERS ##################################
+# Calculando o primeiro e terceiro quartis
+Q1 <- quantile(idades.df$idades, 0.25)
+Q3 <- quantile(idades.df$idades, 0.75)
+
+# Calculando o IQR
+IQR <- Q3 - Q1
+
+# Definindo os limites para outliers
+limite_inferior <- Q1 - 1.5 * IQR
+limite_superior <- Q3 + 1.5 * IQR
+
+# Removendo outliers
+idades_sem_outliers <- idades.df$idades[idades.df$idades >= limite_inferior & idades.df$idades <= limite_superior]
+
+# Executando o teste de normalidade de Lilliefors nos dados sem outliers
+lillie.test(idades_sem_outliers)
+# Nao houve diferenca no p-value com e sem outliers
+
