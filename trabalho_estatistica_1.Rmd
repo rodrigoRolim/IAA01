@@ -22,6 +22,7 @@ install.packages("dplyr")
 install.packages("ggpubr")
 install.packages("tidyverse")
 install.packages("ggplot2")
+install.packages("stats")
 ```
 
 -   Carregando os pacotes necessários
@@ -34,10 +35,11 @@ library("tigerstats")
 library("misty")
 library("dplyr")
 library("ggpubr")
-library(ggplot2)
-library(tidyverse)
-library (car)
-library(fdth)
+library("ggplot2")
+library("tidyverse")
+library ("car")
+library("fdth")
+library("stats")
 ```
 
 Carregando a base de dados "salarios" em formato R trata-se de uma amostra com dois grupos, maridos e esposas, e que contém o salários de cada um desses indivíduos
@@ -292,7 +294,7 @@ Vamos fazer as checagens preliminares para verificar se: as amostras são indepe
 
 1.  Premissa 1: As duas amostras são independentes? Sim, pois os grupos de maridos e esposas não estão relacionados. Não se trata de uma amostra ou grupos emparelhados.
 
-2.  Premissa 2: Os dados de cada amostra/grupo possuem distribuição normal? Vamos usar o teste de normalidade Shapiro-Wilk com o seguinte teste de hipóteses:
+2.  Premissa 2: Os dados de cada amostra/grupo possuem distribuição normal? Vamos usar os testes de normalidade de Kolmogorov-smirnov, por conta do tamanho da amostra, com os seguintes testes de hipóteses:
 
 -   H0: os dados são normalmente distribuidos
 -   Ha: os dados não são normalmente distribuidos
@@ -302,25 +304,25 @@ Vamos fazer as checagens preliminares para verificar se: as amostras são indepe
 -   H0: As variâncias são estatisticamente iguais(homogeneas)
 -   HA: As variâncias não são estatisticamente iguais(homogeneas)
 
-Primeiro vamos fazer o teste de normalidade Shapiro-Wilk para a "idade" dos maridos:
-
+**Primeiro vamos fazer o teste de normalidade Kolmogorv-smirnov para a "idade" dos maridos:**
 ```{r}
-with(data.ages, shapiro.test(ages[group == 'husband'][1:5000]))
+# Realizando o teste de Kolmogorov-Smirnov na idade dos maridos
+amostra <- data.ages[data.ages$group == 'husband', ]
+with(amostra, ks.test(unique(ages), "pnorm", mean = mean(ages), sd = sd(ages)))
 ```
+p-value \< 0.05 (p-value = 0.00000000000000022446), logo o grupo idade dos maridos não possui distribuição normal. 
 
-p-value \< 0.05 (ou seja, 0.00000000000000022), logo o grupo idade dos maridos não possui distribuição normal.
-
-Agora vamos fazer o teste de normalidade Shapiro-Wilk para a idade das esposas.
-
+**Agora vamos fazer o teste de normalidade Kolmogorov-smirnov para a idade das esposas:**
 ```{r}
-with(data.ages, shapiro.test(ages[group == 'wife'][1:5000]))
+# Realizando o teste de Kolmogorov-Smirnov na idade das esposas
+amostra <- data.ages[data.ages$group == 'wife', ]
+with(amostra, ks.test(unique(ages), 'pnorm', mean = mean(ages), sd = sd(ages)))
 ```
+p-value > 0.05 (p-value = 0.3713), logo o grupo idade das esposas possui distribuição normal.
 
-p-value \< 0.05 (ou seja, 0.00000000000000022), logo o grupo idade das esposas não possui distribuição normal também.
+Como o grupo das idades dos maridos não possuem uma distribuição normal.Iremos verificar, por título de curiosidade apenas, a premissa 3, se os grupos possuem homogeneidade nas suas variâncias.
 
-Agora, iremos verificar, por título de curiosidade, a premissa 3, se os grupos possuem homogeneidade nas suas variâncias.
-
-Usaremos o teste F para testar a homogeneidade nas variância
+**Usaremos o teste F para testar a homogeneidade nas variância:**
 
 ```{r}
 res.ftest <- var.test(ages ~ group, data = data.ages)
@@ -395,7 +397,7 @@ res.w <- wilcox.test(ages ~ group, data = data.ages, exact = FALSE, conf.int = T
 res.w
 ```
 
-O p-value do teste é 0.00000000000000022, que é menor que o nível de significancia 0,05. Podemos concluir que a idade mediana dos maridos é estatisticamente diferente da idade mediana das esposas (rejeitamos H0). O intervalo de confiança da diferença entre as medianas está entre 2.000033 e 3.000024, com uma mediana de 2.999966. No entando, é notável o quão próximo está os valores das medianas calculadas, talvez essa diferença seja estatisticamente diferente por conta dos outliers presentes nas idades dos maridos.
+O p-value do teste é 0.00000000000000022, que é menor que o nível de significancia 0,05. Podemos concluir que a idade mediana dos maridos é estatisticamente diferente da idade mediana das esposas (rejeitamos H0). O intervalo de confiança da diferença entre as medianas está entre 2.000033 e 3.000024, com uma mediana de 2.999966.
 
 Se quisermos testar se a idade mediana dos maridos é menor que a idade mediana das esposas, podemos fazer:
 
@@ -416,7 +418,7 @@ wilcox.test(
 )
 ```
 
-Como p-value \> 0.05, aceitamos H0, a idade mediana dos maridos nao é menor que a idade mediana das esposas. O intervalo de confianca da diferenca entre as medianas é um valor menor que 3.000034, com uma mediana de 2.999966
+Como p-value \> 0.05, aceitamos H0, a idade mediana dos maridos nao é menor que a idade mediana das esposas. O intervalo de confianca da diferençsa entre as medianas é um valor menor que 3.000034, com uma mediana de 2.999966
 
 Se quisermos testar se a idade mediana dos maridos é maior que a idade mediana das esposas:
 
@@ -437,4 +439,4 @@ wilcox.test(
 )
 ```
 
-Como p-value \< 0.05, a idade mediana dos maridos é estatisticamente maior que a idade mediana das esposas (portanto, rejeitamos H0). O intervalo de confiança para a diferença entre as medianas é um valor maior que 2.000046 com uma mediana de 2.999966
+Como p-value \< 0.05, a idade mediana dos maridos é estatisticamente maior que a idade mediana das esposas (portanto, rejeitamos H0). O intervalo de confiança para a diferença entre as medianas é um valor maior que 2.000046 com uma mediana de 2.999966.
